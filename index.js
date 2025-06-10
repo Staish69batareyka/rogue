@@ -13,12 +13,57 @@ function Game() {
         }
     }
 
+    // Функция проверки области
+    this.isAreaEmpty = function (x, y, w, h){
+
+        //Проходимся по всей области комнаты и по периметру,
+        // чтобы максимальное приближение комнат было на 1 кл друг от друга ([dy, dx] = -1).
+        for ( let dy = -1; dy <= h; dy++ ) {
+            for ( let dx = -1; dx <= w; dx++ ) {
+                let rx = x + dx // координата, которую проверяем
+                let ry = y + dy // координата, которую проверяем
+
+                // Если клетка выходит за границы
+                if ( ry < 0 || ry > this.height || rx < 0 || rx > this.width ){
+                    continue
+                }
+
+                // Если клетка занята клеткой комнаты
+                if (this.map[ry][rx].type === ""){
+                    return false
+                }
+            }
+        }
+        return true
+    }
+
     // Функция генерации комнат
     this.generateRooms = function () {
-        let roomCount = 5
-        for ( let i = 0; i < roomCount; i++ ) {
-            let w = 3
-            let h = 5
+
+        let roomCount = 5 + Math.floor(Math.random() * 6) // Количество комнат
+
+        let tries = 0 // Счетчик попыток генерации комнат
+        // (чтобы не пересекались, и чтобы ограничить кол-во неуд. попыток)
+
+        for ( let i = 0; i < roomCount && tries < 1000; tries++ ) {
+
+            let w = 3 + Math.floor(Math.random() * 6) // Случайная ширина
+            let h = 3 + Math.floor(Math.random() * 6) // Случайная высота
+
+            let lx = Math.floor(Math.random() * (this.width - w - 1)) // Случайная координата (верх.лев.угол)
+            let ly = Math.floor(Math.random() * (this.height - h - 1)) // Случайная координата (верх.лев.угол)
+
+            // Проверка наложения комнат друг на друга
+            if (this.isAreaEmpty(lx, ly, w, h)) {
+                for ( let y = 0; y < h; y++ ) {
+                    for(let x = 0; x < w; x++){
+                        this.map[ly+y][lx+x].type = ''
+                    }
+                }
+            }
+
+            i++
+
         }
     }
 
@@ -48,4 +93,5 @@ function Game() {
 // Запускаем
 let game=new Game();
 game.generateMap();
+game.generateRooms();
 game.render();
