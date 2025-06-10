@@ -13,29 +13,7 @@ function Game() {
         }
     }
 
-    // Функция проверки области
-    this.isAreaEmpty = function (x, y, w, h){
 
-        //Проходимся по всей области комнаты и по периметру,
-        // чтобы максимальное приближение комнат было на 1 кл друг от друга ([dy, dx] = -1).
-        for ( let dy = -1; dy <= h; dy++ ) {
-            for ( let dx = -1; dx <= w; dx++ ) {
-                let rx = x + dx // координата, которую проверяем
-                let ry = y + dy // координата, которую проверяем
-
-                // Если клетка выходит за границы
-                if ( ry < 0 || ry > this.height || rx < 0 || rx > this.width ){
-                    continue
-                }
-
-                // Если клетка занята клеткой комнаты
-                if (this.map[ry][rx].type === ""){
-                    return false
-                }
-            }
-        }
-        return true
-    }
 
     // Функция генерации комнат
     this.generateRooms = function () {
@@ -67,6 +45,52 @@ function Game() {
         }
     }
 
+    // Функция проверки области
+    this.isAreaEmpty = function (x, y, w, h){
+
+        //Проходимся по всей области комнаты и по периметру,
+        // чтобы максимальное приближение комнат было на 1 кл друг от друга ([dy, dx] = -1).
+        for ( let dy = -1; dy <= h; dy++ ) {
+            for ( let dx = -1; dx <= w; dx++ ) {
+                let rx = x + dx // координата, которую проверяем
+                let ry = y + dy // координата, которую проверяем
+
+                // Если клетка выходит за границы
+                if ( ry < 0 || ry > this.height || rx < 0 || rx > this.width ){
+                    continue
+                }
+
+                // Если клетка занята клеткой комнаты
+                if (this.map[ry][rx].type === ""){
+                    return false
+                }
+            }
+        }
+        return true
+    }
+
+    // Функция для генерации проходов
+    this.generatePassages = function (){
+        let vertic = 3 + Math.floor( Math.random() * 2 )
+        let horis = 3 + Math.floor( Math.random() * 2 )
+
+        // вертекальные проходы
+        for (let i = 0; i < vertic; i++){
+            let x = Math.floor(Math.random() * this.width)
+            for (let y = 0; y < this.height; y++) {
+                this.map[y][x].type = ""
+            }
+        }
+
+        // горизонтальные проходы
+        for (let i = 0; i < horis; i++){
+            let y = Math.floor(Math.random() * this.height)
+            for (let x = 0; x < this.width; x++) {
+                this.map[y][x].type = ""
+            }
+        }
+    }
+
     // Функция рендеринга
     this.render = function (){
         let $field = $(".field") // получили div.field
@@ -94,4 +118,5 @@ function Game() {
 let game=new Game();
 game.generateMap();
 game.generateRooms();
+game.generatePassages();
 game.render();
