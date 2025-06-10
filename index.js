@@ -123,6 +123,7 @@ function Game() {
         let placeEnemy = 0
 
         while(placeEnemy < 10){
+
             let x = Math.floor(Math.random() * this.width)
             let y = Math.floor(Math.random() * this.height)
 
@@ -136,6 +137,75 @@ function Game() {
             }
         }
 
+
+
+
+    }
+
+    // Функция для передвижения врагов
+    this.moveEnemy = function (){
+        // Направления перемещения
+        let directions = [
+            {dx: 0, dy: -1}, // вверх
+            {dx: 0, dy: 1}, // вниз
+            {dx: -1, dy: 0}, // влево
+            {dx: 1, dy: 0}, // вправо
+        ]
+        for(let y = 0; y < this.height; y++){
+            for (let x = 0; x < this.width; x++){
+
+                let tile = this.map[y][x]
+
+                if(tile.type ==="E" && !tile.moved){
+
+                    // Случайное направление
+                    let dir = directions[Math.floor(Math.random() * directions.length)]
+
+                    let newX = x + dir.dx
+                    let newY = y + dir.dy
+
+                    // Проверка границ и пустот
+                    if(newX >= 0 && newX < this.width && newY >= 0 && newY < this.width){
+                        let targetTile = this.map[newY][newX]
+
+                        if (targetTile.type === ''){
+                            targetTile.type = 'E'
+                            tile.type = ''
+
+                            targetTile.moved = true
+                        } else {targetTile.moved = true}
+                    } else {tile.moved = true}
+                }
+            }
+        }
+
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                this.map[y][x].moved = false
+            }
+
+        }
+    }
+
+    // Функция генерации героя
+    this.generatePerson = function (){
+
+        let placePers = 0
+
+
+
+        while(placePers < 1) {
+            let x = Math.floor(Math.random() * this.width)
+            let y = Math.floor(Math.random() * this.height)
+
+            let tile = this.map[y][x]
+            if(tile.type === ''){
+                if(placePers < 1){
+                    tile.type = 'P'
+                    placePers++
+                }
+            }
+        }
 
     }
 
@@ -169,4 +239,14 @@ game.generateRooms();
 game.generatePassages();
 game.generateItems()
 game.generateEnemies();
+
+game.generatePerson();
 game.render();
+
+
+$(document).keydown(function (event){
+    if (event.key === 'e' || event.key === "E"){
+        game.moveEnemy()
+        game.render();
+    }
+})
