@@ -1,6 +1,6 @@
 function Game() {
     this.width = 40;
-    this.height = 25;
+    this.height = 24;
     this.map = []; // Инфа о каждой клетке
 
     // Функция генерации карты (заполнение пространства стенами по ширине и высоте)
@@ -118,6 +118,27 @@ function Game() {
 
     }
 
+    // Функция генерации врагов
+    this.generateEnemies = function (){
+        let placeEnemy = 0
+
+        while(placeEnemy < 10){
+            let x = Math.floor(Math.random() * this.width)
+            let y = Math.floor(Math.random() * this.height)
+
+            let tile = this.map[y][x]
+
+            if(tile.type === ''){
+                if(placeEnemy < 10){
+                    tile.type = 'E'
+                    placeEnemy ++
+                }
+            }
+        }
+
+
+    }
+
     // Функция рендеринга
     this.render = function (){
         let $field = $(".field") // получили div.field
@@ -147,4 +168,5 @@ game.generateMap();
 game.generateRooms();
 game.generatePassages();
 game.generateItems()
+game.generateEnemies();
 game.render();
