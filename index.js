@@ -2,6 +2,8 @@ function Game() {
     this.width = 40;
     this.height = 24;
     this.map = []; // Инфа о каждой клетке
+    this.playerX = null;
+    this.playerY = null;
 
     // Функция генерации карты (заполнение пространства стенами по ширине и высоте)
     this.generateMap = function () {
@@ -144,44 +146,55 @@ function Game() {
 
     // Функция для передвижения врагов
     this.moveEnemy = function (){
-        // Направления перемещения
-        let directions = [
-            {dx: 0, dy: -1}, // вверх
-            {dx: 0, dy: 1}, // вниз
-            {dx: -1, dy: 0}, // влево
-            {dx: 1, dy: 0}, // вправо
-        ]
-        for(let y = 0; y < this.height; y++){
-            for (let x = 0; x < this.width; x++){
+        const visionRadius = 5
 
+        for (let y = 0; y < this.height; y++){
+            for (let x = 0; x < this.width; x++){
                 let tile = this.map[y][x]
 
-                if(tile.type ==="E" && !tile.moved){
+                if(tile.type === 'E'){
+                    let dx = this.playerX - x
+                    let dy = this.playerY - y
 
-                    // Случайное направление
-                    let dir = directions[Math.floor(Math.random() * directions.length)]
+                    let dist = Math.abs(dx) + Math.abs(dy)
+                    let dir = null
 
+                    // Преследование героя
+                    if (dist <= visionRadius){
+                        if (Math.abs(dx) > Math.abs(dy)){
+                            dir = {
+                                dx: dx > 0 ? 1 : -1,
+                                dy: 0
+                            }
+                        } else {
+                            dir = {
+                                dx: 0,
+                                dy: dy > 0 ? 1 : -1
+                            }
+                        }
+                    } else { // Случайное движение
+                        let dirs = [
+                            {dx: 0, dy: -1}, // вверх
+                            {dx: 0, dy: 1}, // вниз
+                            {dx: -1, dy: 0}, // влево
+                            {dx: 1, dy: 0}, // вправо
+                        ]
+                        dir = dirs[Math.floor(Math.random() * dirs.length)]
+                    }
                     let newX = x + dir.dx
                     let newY = y + dir.dy
 
-                    // Проверка границ и пустот
-                    if(newX >= 0 && newX < this.width && newY >= 0 && newY < this.width){
-                        let targetTile = this.map[newY][newX]
+                    // Проверка границ и свободной клетки
+                    if (
+                        newX >= 0 && newX < this.width &&
+                        newY >= 0 && newY < this.height &&
+                        this.map[newY][newX].type === ""
+                    ) {
+                        this.map[newY][newX].type = "E";
+                        this.map[y][x].type = "";
+                    }
 
-                        if (targetTile.type === ''){
-                            targetTile.type = 'E'
-                            tile.type = ''
-
-                            targetTile.moved = true
-                        } else {targetTile.moved = true}
-                    } else {tile.moved = true}
                 }
-            }
-        }
-
-        for (let y = 0; y < this.height; y++) {
-            for (let x = 0; x < this.width; x++) {
-                this.map[y][x].moved = false
             }
 
         }
@@ -203,6 +216,8 @@ function Game() {
                 if(placePers < 1){
                     tile.type = 'P'
                     placePers++
+                    this.playerX = x
+                    this.playerY = y
                 }
             }
         }
@@ -244,9 +259,8 @@ game.generatePerson();
 game.render();
 
 
-$(document).keydown(function (event){
-    if (event.key === 'e' || event.key === "E"){
-        game.moveEnemy()
-        game.render();
-    }
-})
+// Двигаем врагов каждые 500 мс
+setInterval(() => {
+    game.moveEnemies();
+    game.render();
+}, 500);
