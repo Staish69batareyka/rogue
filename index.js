@@ -13,8 +13,6 @@ function Game() {
         }
     }
 
-
-
     // Функция генерации комнат
     this.generateRooms = function () {
 
@@ -44,6 +42,7 @@ function Game() {
 
         }
     }
+
 
     // Функция проверки области
     this.isAreaEmpty = function (x, y, w, h){
@@ -91,6 +90,34 @@ function Game() {
         }
     }
 
+    // Функция генерации зелий и мечей
+    this.generateItems = function (){
+
+        let placeHP = 0
+        let placeSW = 0
+
+        while(placeHP < 10 || placeSW < 2){
+
+            let x = Math.floor(Math.random() * this.width)
+            let y = Math.floor(Math.random() * this.height)
+
+            let tile = this.map[y][x]
+
+            // Размещаем в пустых местах
+            if (tile.type === '') {
+                if (placeHP < 10){
+                    tile.type = "HP"
+                    placeHP++
+                } else if (placeSW < 2){
+                    tile.type = "SW"
+                    placeSW++
+                }
+            }
+
+        }
+
+    }
+
     // Функция рендеринга
     this.render = function (){
         let $field = $(".field") // получили div.field
@@ -119,4 +146,5 @@ let game=new Game();
 game.generateMap();
 game.generateRooms();
 game.generatePassages();
+game.generateItems()
 game.render();
