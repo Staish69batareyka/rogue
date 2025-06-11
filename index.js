@@ -224,6 +224,36 @@ function Game() {
 
     }
 
+    // Функция передвижения перса
+    this.movePlayer = function(dx, dy) {
+        let newX = this.playerX + dx;
+        let newY = this.playerY + dy;
+
+        // Проверка границ поля
+        if (newX < 0 || newX >= this.width || newY < 0 || newY >= this.height) {
+            return;
+        }
+
+        let targetTile = this.map[newY][newX];
+
+        // Можно двигаться только по пустым клеткам или с предметами
+        if (targetTile.type === '' || targetTile.type === 'HP' || targetTile.type === 'SW') {
+            // Убираем игрока с текущей позиции
+            this.map[this.playerY][this.playerX].type = '';
+
+            // Ставим игрока на новое место
+            this.playerX = newX;
+            this.playerY = newY;
+            targetTile.type = 'P';
+
+            // (опционально) Можно обработать подбор предметов тут
+            // например: if (targetTile.type === 'HP') { здоровье += ... }
+
+            this.render(); // обновляем поле
+        }
+    }
+
+
     // Функция рендеринга
     this.render = function (){
         let $field = $(".field") // получили div.field
@@ -261,6 +291,15 @@ game.render();
 
 // Двигаем врагов каждые 500 мс
 setInterval(() => {
-    game.moveEnemies();
+    game.moveEnemy();
     game.render();
 }, 500);
+
+document.addEventListener("keydown", function(e) {
+    switch (e.key.toLowerCase()) {
+        case 'w': game.movePlayer(0, -1); break;
+        case 's': game.movePlayer(0, 1); break;
+        case 'a': game.movePlayer(-1, 0); break;
+        case 'd': game.movePlayer(1, 0); break;
+    }
+});
