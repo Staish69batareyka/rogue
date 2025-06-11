@@ -7,9 +7,9 @@ function Game() {
 
     // Функция генерации карты (заполнение пространства стенами по ширине и высоте)
     this.generateMap = function () {
-        for( let y = 0; y < this.height; y++ ){
+        for (let y = 0; y < this.height; y++) {
             this.map[y] = []
-            for( let x = 0; x < this.width; x++ ){
+            for (let x = 0; x < this.width; x++) {
                 this.map[y][x] = {type: "W"}
             }
         }
@@ -23,7 +23,7 @@ function Game() {
         let tries = 0 // Счетчик попыток генерации комнат
         // (чтобы не пересекались, и чтобы ограничить кол-во неуд. попыток)
 
-        for ( let i = 0; i < roomCount && tries < 1000; tries++ ) {
+        for (let i = 0; i < roomCount && tries < 1000; tries++) {
 
             let w = 3 + Math.floor(Math.random() * 6) // Случайная ширина
             let h = 3 + Math.floor(Math.random() * 6) // Случайная высота
@@ -33,9 +33,9 @@ function Game() {
 
             // Проверка наложения комнат друг на друга
             if (this.isAreaEmpty(lx, ly, w, h)) {
-                for ( let y = 0; y < h; y++ ) {
-                    for(let x = 0; x < w; x++){
-                        this.map[ly+y][lx+x].type = ''
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        this.map[ly + y][lx + x].type = ''
                     }
                 }
             }
@@ -45,24 +45,23 @@ function Game() {
         }
     }
 
-
     // Функция проверки области
-    this.isAreaEmpty = function (x, y, w, h){
+    this.isAreaEmpty = function (x, y, w, h) {
 
         //Проходимся по всей области комнаты и по периметру,
         // чтобы максимальное приближение комнат было на 1 кл друг от друга ([dy, dx] = -1).
-        for ( let dy = -1; dy <= h; dy++ ) {
-            for ( let dx = -1; dx <= w; dx++ ) {
+        for (let dy = -1; dy <= h; dy++) {
+            for (let dx = -1; dx <= w; dx++) {
                 let rx = x + dx // координата, которую проверяем
                 let ry = y + dy // координата, которую проверяем
 
                 // Если клетка выходит за границы
-                if ( ry < 0 || ry > this.height || rx < 0 || rx > this.width ){
+                if (ry < 0 || ry > this.height || rx < 0 || rx > this.width) {
                     continue
                 }
 
                 // Если клетка занята клеткой комнаты
-                if (this.map[ry][rx].type === ""){
+                if (this.map[ry][rx].type === "") {
                     return false
                 }
             }
@@ -71,12 +70,12 @@ function Game() {
     }
 
     // Функция для генерации проходов
-    this.generatePassages = function (){
-        let vertic = 3 + Math.floor( Math.random() * 2 )
-        let horis = 3 + Math.floor( Math.random() * 2 )
+    this.generatePassages = function () {
+        let vertic = 3 + Math.floor(Math.random() * 2)
+        let horis = 3 + Math.floor(Math.random() * 2)
 
         // вертекальные проходы
-        for (let i = 0; i < vertic; i++){
+        for (let i = 0; i < vertic; i++) {
             let x = Math.floor(Math.random() * this.width)
             for (let y = 0; y < this.height; y++) {
                 this.map[y][x].type = ""
@@ -84,7 +83,7 @@ function Game() {
         }
 
         // горизонтальные проходы
-        for (let i = 0; i < horis; i++){
+        for (let i = 0; i < horis; i++) {
             let y = Math.floor(Math.random() * this.height)
             for (let x = 0; x < this.width; x++) {
                 this.map[y][x].type = ""
@@ -93,12 +92,12 @@ function Game() {
     }
 
     // Функция генерации зелий и мечей
-    this.generateItems = function (){
+    this.generateItems = function () {
 
         let placeHP = 0
         let placeSW = 0
 
-        while(placeHP < 10 || placeSW < 2){
+        while (placeHP < 10 || placeSW < 2) {
 
             let x = Math.floor(Math.random() * this.width)
             let y = Math.floor(Math.random() * this.height)
@@ -107,10 +106,10 @@ function Game() {
 
             // Размещаем в пустых местах
             if (tile.type === '') {
-                if (placeHP < 10){
+                if (placeHP < 10) {
                     tile.type = "HP"
                     placeHP++
-                } else if (placeSW < 2){
+                } else if (placeSW < 2) {
                     tile.type = "SW"
                     placeSW++
                 }
@@ -121,91 +120,103 @@ function Game() {
     }
 
     // Функция генерации врагов
-    this.generateEnemies = function (){
+    this.generateEnemies = function () {
         let placeEnemy = 0
 
-        while(placeEnemy < 10){
+        while (placeEnemy < 10) {
 
             let x = Math.floor(Math.random() * this.width)
             let y = Math.floor(Math.random() * this.height)
 
             let tile = this.map[y][x]
 
-            if(tile.type === ''){
-                if(placeEnemy < 10){
+            if (tile.type === '') {
+                if (placeEnemy < 10) {
                     tile.type = 'E'
-                    placeEnemy ++
+                    tile.hp = 5
+                    tile.maxHp = 5
+                    placeEnemy++
                 }
             }
         }
-
-
 
 
     }
 
     // Функция для передвижения врагов
-    this.moveEnemy = function (){
+    this.moveEnemy = function () {
         const visionRadius = 5
 
-        for (let y = 0; y < this.height; y++){
-            for (let x = 0; x < this.width; x++){
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
                 let tile = this.map[y][x]
 
-                if(tile.type === 'E'){
+                if (tile.type === 'E') {
                     let dx = this.playerX - x
                     let dy = this.playerY - y
 
+
                     let dist = Math.abs(dx) + Math.abs(dy)
-                    let dir = null
-
-                    // Преследование героя
-                    if (dist <= visionRadius){
-                        if (Math.abs(dx) > Math.abs(dy)){
-                            dir = {
-                                dx: dx > 0 ? 1 : -1,
-                                dy: 0
-                            }
-                        } else {
-                            dir = {
-                                dx: 0,
-                                dy: dy > 0 ? 1 : -1
-                            }
+                    // Атака героя
+                    if (dx <= 1 && dy <= 1) {
+                        this.map[y][x].attacked = true;
+                        let playerTile = this.map[this.playerY][this.playerX];
+                        playerTile.hp -= 1;
+                        if (playerTile.hp <= 0) {
+                            alert("Game Over");
+                            // Перезапуск или завершение игры
                         }
-                    } else { // Случайное движение
-                        let dirs = [
-                            {dx: 0, dy: -1}, // вверх
-                            {dx: 0, dy: 1}, // вниз
-                            {dx: -1, dy: 0}, // влево
-                            {dx: 1, dy: 0}, // вправо
-                        ]
-                        dir = dirs[Math.floor(Math.random() * dirs.length)]
-                    }
-                    let newX = x + dir.dx
-                    let newY = y + dir.dy
 
-                    // Проверка границ и свободной клетки
-                    if (
-                        newX >= 0 && newX < this.width &&
-                        newY >= 0 && newY < this.height &&
-                        this.map[newY][newX].type === ""
-                    ) {
-                        this.map[newY][newX].type = "E";
-                        this.map[y][x].type = "";
-                    }
 
+                        let dir = null
+
+                        // Преследование героя
+                        if (dist <= visionRadius) {
+                            if (Math.abs(dx) > Math.abs(dy)) {
+                                dir = {
+                                    dx: dx > 0 ? 1 : -1,
+                                    dy: 0
+                                }
+                            } else {
+                                dir = {
+                                    dx: 0,
+                                    dy: dy > 0 ? 1 : -1
+                                }
+                            }
+                        } else { // Случайное движение
+                            let dirs = [
+                                {dx: 0, dy: -1}, // вверх
+                                {dx: 0, dy: 1}, // вниз
+                                {dx: -1, dy: 0}, // влево
+                                {dx: 1, dy: 0}, // вправо
+                            ]
+                            dir = dirs[Math.floor(Math.random() * dirs.length)]
+                        }
+                        let newX = x + dir.dx
+                        let newY = y + dir.dy
+
+                        // Проверка границ и свободной клетки
+                        if (
+                            newX >= 0 && newX < this.width &&
+                            newY >= 0 && newY < this.height &&
+                            this.map[newY][newX].type === ""
+                        ) {
+                            this.map[newY][newX].type = "E";
+                            this.map[y][x].type = "";
+                        }
+
+                    }
                 }
-            }
 
+            }
         }
+
     }
 
-    // Функция генерации героя
+    //Функция рендеренга персонажа
     this.generatePerson = function (){
 
         let placePers = 0
-
-
 
         while(placePers < 1) {
             let x = Math.floor(Math.random() * this.width)
@@ -218,6 +229,8 @@ function Game() {
                     placePers++
                     this.playerX = x
                     this.playerY = y
+                    this.map[y][x].hp = 10
+                    this.map[y][x].maxHp = 10
                 }
             }
         }
@@ -225,55 +238,82 @@ function Game() {
     }
 
     // Функция передвижения перса
-    this.movePlayer = function(dx, dy) {
+    this.movePlayer = function (dx, dy) {
         let newX = this.playerX + dx;
         let newY = this.playerY + dy;
-
         // Проверка границ поля
         if (newX < 0 || newX >= this.width || newY < 0 || newY >= this.height) {
             return;
         }
-
         let targetTile = this.map[newY][newX];
-
         // Можно двигаться только по пустым клеткам или с предметами
         if (targetTile.type === '' || targetTile.type === 'HP' || targetTile.type === 'SW') {
             // Убираем игрока с текущей позиции
             this.map[this.playerY][this.playerX].type = '';
-
             // Ставим игрока на новое место
             this.playerX = newX;
             this.playerY = newY;
             targetTile.type = 'P';
-
+            targetTile.hp = this.map[this.playerY][this.playerX].hp;
+            targetTile.maxHp = this.map[this.playerY][this.playerX].maxHp;
             // (опционально) Можно обработать подбор предметов тут
             // например: if (targetTile.type === 'HP') { здоровье += ... }
-
+            this.map[this.playerY][this.playerX] = { type: '' };
             this.render(); // обновляем поле
+
         }
     }
 
+    // Функция атаки перса
+    this.playerAttack = function () {
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+                if (dx === 0 && dy === 0) continue;
+                let x = this.playerX + dx;
+                let y = this.playerY + dy;
+                if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+                    let tile = this.map[y][x];
+                    if (tile.type === 'E') {
+                        tile.hp -= 3;
+                        if (tile.hp <= 0) {
+                            this.map[y][x] = {type: ""}; // Удаляем врага
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     // Функция рендеринга
-    this.render = function (){
+    this.render = function () {
         let $field = $(".field") // получили div.field
         $field.empty() // Очистили
 
-        for( let y = 0; y < this.height; y++ ){
-            for( let x = 0; x < this.width; x++ ){
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
                 let tile = this.map[y][x]// выбрали клетку
 
                 let $tile = $("<div>").addClass('tile').addClass('tile' + tile.type)
 
+                // Добавляем полоску HP
+                if (tile.hp && tile.maxHp) {
+                    let healthWidth = Math.floor((tile.hp / tile.maxHp) * 50);
+                    let $health = $("<div>").addClass("health").css({
+                        width: healthWidth + "px"
+                    });
+                    $tile.append($health);
+                }
+
                 // Позиция клетки
                 $tile.css({
-                    left: x*25,
-                    top: y*25
+                    left: x * 25,
+                    top: y * 25
                 })
                 $field.append($tile) // Добавляем клетки в поле
             }
         }
     }
+
 }
 
 
@@ -284,7 +324,6 @@ game.generateRooms();
 game.generatePassages();
 game.generateItems()
 game.generateEnemies();
-
 game.generatePerson();
 game.render();
 
@@ -295,11 +334,17 @@ setInterval(() => {
     game.render();
 }, 500);
 
+// Прослушка для WASD
 document.addEventListener("keydown", function(e) {
     switch (e.key.toLowerCase()) {
         case 'w': game.movePlayer(0, -1); break;
         case 's': game.movePlayer(0, 1); break;
         case 'a': game.movePlayer(-1, 0); break;
         case 'd': game.movePlayer(1, 0); break;
+        case ' ': game.playerAttack(); break;
     }
+
 });
+
+
+
