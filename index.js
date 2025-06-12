@@ -4,6 +4,7 @@ function Game() {
     this.map = []; // Инфа о каждой клетке
     this.playerX = null;
     this.playerY = null;
+    this.hasSword = false; // Подбор меча
 
     // Функция генерации карты (заполнение пространства стенами по ширине и высоте)
     this.generateMap = function () {
@@ -151,6 +152,9 @@ function Game() {
             for (let x = 0; x < this.width; x++) {
                 let tile = this.map[y][x]
 
+
+
+
                 if (tile.type === 'E') {
                     let dx = this.playerX - x
                     let dy = this.playerY - y
@@ -197,15 +201,17 @@ function Game() {
                         let newX = x + dir.dx
                         let newY = y + dir.dy
 
-
                         // Проверка границ и свободной клетки
-                        if (
-                            newX >= 0 && newX < this.width &&
-                            newY >= 0 && newY < this.height &&
-                            this.map[newY][newX].type === ""
-                        ) {
+                    if (
+                        newX >= 0 && newX < this.width &&
+                        newY >= 0 && newY < this.height &&
+                        this.map[newY][newX].type === "" &&
+                        !(newX === this.playerX && newY === this.playerY)
+                    ) {
                             this.map[newY][newX].type = "E";
-                            this.map[y][x].type = "";
+                            this.map[newY][newX].hp = tile.hp;
+                            this.map[newY][newX].maxHp = tile.maxHp;
+                            this.map[y][x] = { type: '' };
                         }
 
                     }
@@ -240,39 +246,61 @@ function Game() {
 
     // Функция передвижения перса
     this.movePlayer = function (dx, dy) {
-        let newX = this.playerX + dx;
-        let newY = this.playerY + dy;
+        const newX = this.playerX + dx;
+        const newY = this.playerY + dy;
 
-        if (newX < 0 || newX >= this.width || newY < 0 || newY >= this.height) return;
+        // Проверка выхода за границы карты
+        if (newX < 0 || newX >= this.width || newY < 0 || newY >= this.height) {
+            return;
+        }
 
-        let currentTile = this.map[this.playerY][this.playerX];
-        let targetTile = this.map[newY][newX];
+        const currentTile = this.map[this.playerY][this.playerX];
+        const targetTile = this.map[newY][newX];
 
+        // Игрок может двигаться только на пустую клетку, зелье или меч
         if (targetTile.type === '' || targetTile.type === 'HP' || targetTile.type === 'SW') {
-
-            // Переносим характеристики игрока
+            // Сохраняем текущие HP игрока
             let hp = currentTile.hp;
             let maxHp = currentTile.maxHp;
 
+            // Обработка подбора меча
+            if (targetTile.type === 'SW') {
+                this.hasSword = true;
+                $('#sword-icon').show(); // Показать иконку меча в инвентаре
+                showMessage('Вы нашли меч!');
+            }
+
+            // Обработка подбора зелья
+            if (targetTile.type === 'HP') {
+                // Восстанавливаем здоровье, но не выше максимального
+                hp = Math.min(maxHp, hp + 3);
+                showMessage('Вы выпили зелье и восстановили здоровье!');
+            }
+
+            // Освобождаем текущую клетку
             currentTile.type = '';
             delete currentTile.hp;
             delete currentTile.maxHp;
 
+            // Перемещаем игрока
             this.playerX = newX;
             this.playerY = newY;
 
+            // Сохраняем игрока в новой клетке
             targetTile.type = 'P';
             targetTile.hp = hp;
             targetTile.maxHp = maxHp;
 
-            this.render();
+            this.draw(); // Обновляем отрисовку карты
         }
     };
 
     // Функция атаки перса
-    this.playerAttack = function () {
-        for (let dy = -1; dy <= 1; dy++) {
-            for (let dx = -1; dx <= 1; dx++) {
+    this.playerAttack = function (){
+        let radius = this.hasSword ? 3 : 1;
+
+        for (let dy = -radius; dy <= radius; dy++) {
+            for (let dx = -radius; dx <= radius; dx++) {
                 if (dx === 0 && dy === 0) continue;
                 let x = this.playerX + dx;
                 let y = this.playerY + dy;
@@ -287,7 +315,22 @@ function Game() {
                 }
             }
         }
+        this.checkWinCondition();
     }
+
+    // Функция победы (вспомогательная)
+    this.checkWinCondition = function () {
+        let enemiesLeft = 0;
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                if (this.map[y][x].type === 'E') enemiesLeft++;
+            }
+        }
+        if (enemiesLeft === 0) {
+            alert("Вы победили!");
+            location.reload();
+        }
+    };
 
     // Функция рендеринга
     this.render = function () {
@@ -319,7 +362,12 @@ function Game() {
         }
 
 
-}
+
+    }
+
+    function showMessage(text) {
+        $('#message').stop(true, true).text(text).fadeIn(200).delay(1500).fadeOut(400);
+    }
 }
 
 
