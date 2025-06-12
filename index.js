@@ -391,11 +391,12 @@ $(function (){
 
 // Прослушка для WASD
     document.addEventListener("keydown", function(e) {
+        console.log("Key pressed:", e.key);
         switch (e.key.toLowerCase()) {
-            case 'w': game.movePlayer(0, -1); break;
-            case 's': game.movePlayer(0, 1); break;
-            case 'a': game.movePlayer(-1, 0); break;
-            case 'd': game.movePlayer(1, 0); break;
+            case 'w': case 'ц': game.movePlayer(0, -1); break;
+            case 's': case 'ы': game.movePlayer(0, 1); break;
+            case 'a': case 'ф': game.movePlayer(-1, 0); break;
+            case 'd': case 'в': game.movePlayer(1, 0); break;
             case ' ': game.playerAttack(); game.render(); break;
         }
 
