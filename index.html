@@ -29,6 +29,9 @@ h1 { font-family: "Playfair Display"; font-size: 30px; padding: 10px 0px; margin
 .inventory-box { border: 2px solid #d0d0d0; float: left; }
 .inventory { position: relative; width: 800px; height: 32px; }
 .cl { clear: both; display: block; }
+#inventory {position: absolute; top: 0; left: 1200px; width: 150px; background-color: #222; color: #fff; padding: 10px; border-radius: 8px; font-family: sans-serif;}
+.inventory-item { width: 32px; height: 32px; margin-top: 10px; background-size: cover; background-repeat: no-repeat;}
+#sword-icon {background-image: url(images/tile-SW.png);}
 </style>
 	</head>
 	<body>
@@ -36,6 +39,10 @@ h1 { font-family: "Playfair Display"; font-size: 30px; padding: 10px 0px; margin
 		<div class="field-box">
 			<div class="field"></div>
 			<div id="message" style="display:none; position:absolute; top:20px; left:50%; transform:translateX(-50%); background:#000; color:#fff; padding:10px 20px; border-radius:10px; z-index:1000; font-family:sans-serif;"></div>
+		</div>
+		<div id="inventory">
+			<h3>Инвентарь</h3>
+			<div id="sword-icon" class="inventory-item tileSW" style="display: none;"></div>
 		</div>
 		<div class="cl"></div>
 
