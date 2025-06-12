@@ -56,7 +56,7 @@ function Game() {
                 let ry = y + dy // координата, которую проверяем
 
                 // Если клетка выходит за границы
-                if (ry < 0 || ry > this.height || rx < 0 || rx > this.width) {
+                if (ry < 0 || ry >= this.height || rx < 0 || rx >= this.width) {
                     continue
                 }
 
@@ -157,15 +157,17 @@ function Game() {
 
 
                     let dist = Math.abs(dx) + Math.abs(dy)
-                    // Атака героя
-                    if (dx <= 1 && dy <= 1) {
-                        this.map[y][x].attacked = true;
+
+                    if (dist === 1) {
                         let playerTile = this.map[this.playerY][this.playerX];
                         playerTile.hp -= 1;
                         if (playerTile.hp <= 0) {
-                            alert("Game Over");
-                            // Перезапуск или завершение игры
+                            alert("Вы проиграли!");
+                            location.reload(); // Перезапуск игры
+                            return;
                         }
+                    }
+
 
 
                         let dir = null
@@ -195,6 +197,7 @@ function Game() {
                         let newX = x + dir.dx
                         let newY = y + dir.dy
 
+
                         // Проверка границ и свободной клетки
                         if (
                             newX >= 0 && newX < this.width &&
@@ -210,8 +213,6 @@ function Game() {
 
             }
         }
-
-    }
 
     //Функция рендеренга персонажа
     this.generatePerson = function (){
@@ -241,28 +242,32 @@ function Game() {
     this.movePlayer = function (dx, dy) {
         let newX = this.playerX + dx;
         let newY = this.playerY + dy;
-        // Проверка границ поля
-        if (newX < 0 || newX >= this.width || newY < 0 || newY >= this.height) {
-            return;
-        }
+
+        if (newX < 0 || newX >= this.width || newY < 0 || newY >= this.height) return;
+
+        let currentTile = this.map[this.playerY][this.playerX];
         let targetTile = this.map[newY][newX];
-        // Можно двигаться только по пустым клеткам или с предметами
+
         if (targetTile.type === '' || targetTile.type === 'HP' || targetTile.type === 'SW') {
-            // Убираем игрока с текущей позиции
-            this.map[this.playerY][this.playerX].type = '';
-            // Ставим игрока на новое место
+
+            // Переносим характеристики игрока
+            let hp = currentTile.hp;
+            let maxHp = currentTile.maxHp;
+
+            currentTile.type = '';
+            delete currentTile.hp;
+            delete currentTile.maxHp;
+
             this.playerX = newX;
             this.playerY = newY;
-            targetTile.type = 'P';
-            targetTile.hp = this.map[this.playerY][this.playerX].hp;
-            targetTile.maxHp = this.map[this.playerY][this.playerX].maxHp;
-            // (опционально) Можно обработать подбор предметов тут
-            // например: if (targetTile.type === 'HP') { здоровье += ... }
-            this.map[this.playerY][this.playerX] = { type: '' };
-            this.render(); // обновляем поле
 
+            targetTile.type = 'P';
+            targetTile.hp = hp;
+            targetTile.maxHp = maxHp;
+
+            this.render();
         }
-    }
+    };
 
     // Функция атаки перса
     this.playerAttack = function () {
@@ -276,7 +281,7 @@ function Game() {
                     if (tile.type === 'E') {
                         tile.hp -= 3;
                         if (tile.hp <= 0) {
-                            this.map[y][x] = {type: ""}; // Удаляем врага
+                            this.map[y][x] = { type: '' };
                         }
                     }
                 }
@@ -296,8 +301,8 @@ function Game() {
                 let $tile = $("<div>").addClass('tile').addClass('tile' + tile.type)
 
                 // Добавляем полоску HP
-                if (tile.hp && tile.maxHp) {
-                    let healthWidth = Math.floor((tile.hp / tile.maxHp) * 50);
+                if (tile.hp !== undefined && tile.maxHp !== undefined) {
+                    let healthWidth = Math.floor((tile.hp / tile.maxHp) * 25);
                     let $health = $("<div>").addClass("health").css({
                         width: healthWidth + "px"
                     });
@@ -312,39 +317,43 @@ function Game() {
                 $field.append($tile) // Добавляем клетки в поле
             }
         }
-    }
 
+
+}
 }
 
 
-// Запускаем
-let game=new Game();
-game.generateMap();
-game.generateRooms();
-game.generatePassages();
-game.generateItems()
-game.generateEnemies();
-game.generatePerson();
-game.render();
+$(function (){
+    // Запускаем
+    let game=new Game();
+    game.generateMap();
+    game.generateRooms();
+    game.generatePassages();
+    game.generateItems()
+    game.generateEnemies();
+    game.generatePerson();
+    game.render();
 
 
 // Двигаем врагов каждые 500 мс
-setInterval(() => {
-    game.moveEnemy();
-    game.render();
-}, 500);
+    setInterval(() => {
+        game.moveEnemy();
+        game.render();
+    }, 500);
 
 // Прослушка для WASD
-document.addEventListener("keydown", function(e) {
-    switch (e.key.toLowerCase()) {
-        case 'w': game.movePlayer(0, -1); break;
-        case 's': game.movePlayer(0, 1); break;
-        case 'a': game.movePlayer(-1, 0); break;
-        case 'd': game.movePlayer(1, 0); break;
-        case ' ': game.playerAttack(); break;
-    }
+    document.addEventListener("keydown", function(e) {
+        switch (e.key.toLowerCase()) {
+            case 'w': game.movePlayer(0, -1); break;
+            case 's': game.movePlayer(0, 1); break;
+            case 'a': game.movePlayer(-1, 0); break;
+            case 'd': game.movePlayer(1, 0); break;
+            case ' ': game.playerAttack(); game.render(); break;
+        }
 
-});
+    });
+})
+
 
 
 
