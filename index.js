@@ -296,7 +296,7 @@ function Game() {
     };
 
     // Функция атаки перса
-    this.playerAttack = function (){
+    this.playerAttack = function () {
         let radius = this.hasSword ? 3 : 1;
 
         for (let dy = -radius; dy <= radius; dy++) {
@@ -315,8 +315,17 @@ function Game() {
                 }
             }
         }
+
+        // После первой атаки с мечом он ломается
+        if (this.hasSword) {
+            this.hasSword = false;
+            $('#sword-icon').hide(); // Скрываем меч из инвентаря
+            showMessage("Меч сломался после мощной атаки!");
+        }
+
         this.checkWinCondition();
-    }
+    };
+
 
     // Функция победы (вспомогательная)
     this.checkWinCondition = function () {
